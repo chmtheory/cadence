@@ -65,7 +65,7 @@ public class YoutubeUtil {
                     JacksonFactory.getDefaultInstance(),
                     null).setApplicationName("Cadence").build();
             YouTube.Videos.List request = youtubeService.videos().list("id");
-            VideoListResponse response = request.setKey("").setId(id).execute();
+            VideoListResponse response = request.setKey(key).setId(id).execute();
             return response.getItems().size() > 0;
         } catch (GeneralSecurityException | IOException ex) {
             log.error("Unexpected exception occurred!", ex);
