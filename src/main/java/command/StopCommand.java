@@ -10,7 +10,7 @@ public class StopCommand implements Command {
 
     @Override
     public String getKeyword() {
-        return null;
+        return "stop";
     }
 
     @Override

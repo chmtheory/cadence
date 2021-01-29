@@ -10,7 +10,7 @@ public class PlayCommand implements Command {
 
     @Override
     public String getKeyword() {
-        return null;
+        return "play";
     }
 
     @Override

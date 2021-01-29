@@ -10,7 +10,7 @@ public class AddCommand implements Command {
 
     @Override
     public String getKeyword() {
-        return null;
+        return "add";
     }
 
     @Override

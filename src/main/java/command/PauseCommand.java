@@ -10,7 +10,7 @@ public class PauseCommand implements Command {
 
     @Override
     public String getKeyword() {
-        return null;
+        return "pause";
     }
 
     @Override

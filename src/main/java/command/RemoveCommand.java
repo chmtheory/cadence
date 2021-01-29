@@ -10,7 +10,7 @@ public class RemoveCommand implements Command {
 
     @Override
     public String getKeyword() {
-        return null;
+        return "remove";
     }
 
     @Override
