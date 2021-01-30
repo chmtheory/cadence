@@ -4,11 +4,7 @@ import java.util.List;
 
 public class Server {
 
-
-
-
-
-    public List getPlaylist() {
+    public List<String> getPlaylist() {
         return null;
     }
 
