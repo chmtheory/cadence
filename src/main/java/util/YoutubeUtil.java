@@ -3,6 +3,7 @@ package util;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,19 +61,37 @@ public class YoutubeUtil {
 
 
     public static boolean doesVideoExist(String id) {
-        // TODO: Potential optimization.
+        // TODO: Potential optimization. Maybe cache?
         try {
             YouTube youtubeService = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(),
                     JacksonFactory.getDefaultInstance(),
                     null).setApplicationName("Cadence").build();
             YouTube.Videos.List request = youtubeService.videos().list("id");
-            VideoListResponse response = request.setKey(key).setId(id).execute();
+            VideoListResponse response = request.setPart("").setKey(key).setId(id).execute();
             return response.getItems().size() > 0;
         } catch (GeneralSecurityException | IOException ex) {
             log.error("Unexpected exception occurred!", ex);
             return false;
         }
+    }
 
+    public static String getVideoName(String id) {
+        try {
+            YouTube youtubeService = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    null).setApplicationName("Cadence").build();
+            YouTube.Videos.List request = youtubeService.videos().list("id");
+            VideoListResponse response = request.setPart("snippet").setKey(key).setId(id).execute();
+            List<Video> items = response.getItems();
+            if (items.size() == 0) {
+                return null;
+            }
+
+            return items.get(0).getSnippet().getTitle();
+        } catch (GeneralSecurityException | IOException ex) {
+            log.error("Unexpected exception occurred!", ex);
+            return null;
+        }
     }
 
 
