@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public final class DiscordUtil {
@@ -24,6 +25,17 @@ public final class DiscordUtil {
 
     public static TextChannel getDefaultTextChannel(Guild guild) {
         return guild.getDefaultChannel();
+    }
+
+    public static String[] parseArgumentsFromMessage(Message message) {
+        String[] args = message.getContentStripped().split("\\s+");
+        return Arrays.copyOfRange(args, 1, args.length);
+    }
+
+    public static String firstWord(Message message) {
+        String msg = message.getContentStripped();
+
+        return msg.substring(0, msg.indexOf(' '));
     }
 
 }
