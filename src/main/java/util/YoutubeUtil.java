@@ -26,6 +26,7 @@ public class YoutubeUtil {
         try {
             BufferedReader reader = new BufferedReader(new FileReader("youtube"));
             token = reader.readLine();
+            logger.info("API key loaded successfully!");
         } catch (IOException ex) {
             token = "";
             logger.error("Unexpected exception while loading Youtube API key! YoutubeUtil will not function properly!", ex);
