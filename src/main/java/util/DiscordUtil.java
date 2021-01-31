@@ -3,6 +3,7 @@ package util;
 import control.Server;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Arrays;
@@ -23,6 +24,14 @@ public final class DiscordUtil {
 
     public static TextChannel getDefaultTextChannel(Server server) {
         return server.getGuild().getDefaultChannel();
+    }
+
+    public static VoiceChannel getDefaultVoiceChannel(Server server) {
+        for (VoiceChannel vc : server.getGuild().getVoiceChannelCache()) {
+            return vc;
+        }
+
+        return null;
     }
 
     public static String[] parseArgumentsFromMessage(Message message) {
