@@ -60,6 +60,11 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
         }
     }
 
+    public void notifyDisconnected() {
+        this.playlist = null;
+        state = PlayerState.DISCONNECTED;
+    }
+
     public void play() {
         if (state != PlayerState.DISCONNECTED) {
             this.playlist = linkedServer.getPlaylist();

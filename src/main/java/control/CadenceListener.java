@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -32,16 +33,19 @@ public class CadenceListener extends ListenerAdapter {
         jda.getGuildCache().forEachUnordered(guild -> {
             serverMap.put(guild.getIdLong(), new Server(guild));
         });
-
-        super.onReady(event);
     }
 
     @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
         Guild guild = event.getGuild();
         serverMap.put(guild.getIdLong(), new Server(guild));
+    }
 
-        super.onGuildJoin(event);
+    @Override
+    public void onGuildVoiceLeave(@NotNull GuildVoiceLeaveEvent event) {
+        if (event.getJDA().getSelfUser().getIdLong() == event.getMember().getIdLong()) {
+            serverMap.get(event.getGuild().getIdLong()).getPlayer().notifyDisconnected();
+        }
     }
 
     @Override
