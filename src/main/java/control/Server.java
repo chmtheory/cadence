@@ -37,6 +37,10 @@ public class Server {
         return tracks.containsKey(id);
     }
 
+    public ServerPlayer getPlayer() {
+        return player;
+    }
+
     public Guild getGuild() {
         return guild;
     }
