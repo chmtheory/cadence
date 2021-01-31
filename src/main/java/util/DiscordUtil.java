@@ -1,13 +1,11 @@
 package util;
 
-import net.dv8tion.jda.api.entities.Guild;
+import control.Server;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 public final class DiscordUtil {
 
@@ -23,8 +21,8 @@ public final class DiscordUtil {
         channel.sendMessage(message).queue();
     }
 
-    public static TextChannel getDefaultTextChannel(Guild guild) {
-        return guild.getDefaultChannel();
+    public static TextChannel getDefaultTextChannel(Server server) {
+        return server.getGuild().getDefaultChannel();
     }
 
     public static String[] parseArgumentsFromMessage(Message message) {
