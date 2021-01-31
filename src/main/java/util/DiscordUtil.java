@@ -32,8 +32,11 @@ public final class DiscordUtil {
 
     public static String firstWord(Message message) {
         String msg = message.getContentStripped();
-
-        return msg.substring(0, msg.indexOf(' '));
+        int index = msg.indexOf(' ');
+        if (index < 0) {
+            return msg;
+        }
+        return msg.substring(0, index);
     }
 
 }
