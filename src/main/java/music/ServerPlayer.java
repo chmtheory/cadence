@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -13,12 +14,20 @@ import control.Server;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.YoutubeUtil;
 
 import java.util.List;
 
 public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHandler {
 
-    private final static AudioPlayerManager pManager = new DefaultAudioPlayerManager();
+    static {
+        AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+        AudioSourceManagers.registerRemoteSources(playerManager);
+
+        pManager = playerManager;
+    }
+
+    private static AudioPlayerManager pManager;
     private final static Logger log = LoggerFactory.getLogger(ServerPlayer.class);
 
     private PlayerState state = PlayerState.DISCONNECTED;
@@ -30,8 +39,8 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
 
     public ServerPlayer(Server server) {
         player = pManager.createPlayer();
+        player.addListener(this);
         linkedServer = server;
-        
         linkedServer.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
     }
 
@@ -79,12 +88,16 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
         }
     }
 
+    public PlayerState getState() {
+        return state;
+    }
+
     private void loadNext() {
         if (playlist.size() == 0) {
             playlist = null;
             state = PlayerState.STOPPED;
         } else {
-            pManager.loadItem(playlist.remove(0).trackId, this);
+            pManager.loadItem(YoutubeUtil.createYoutubeLinkFromId(playlist.remove(0).trackId), this);
         }
     }
 
