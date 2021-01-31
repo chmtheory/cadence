@@ -59,7 +59,8 @@ public class CadenceListener extends ListenerAdapter {
 
             Command c;
             if ((c = commandMap.get(first)) != null) {
-                c.execute(event);
+
+                c.execute(event, serverMap.get(event.getGuild().getIdLong()));
             }
         }
     }
