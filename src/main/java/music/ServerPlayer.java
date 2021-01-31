@@ -9,7 +9,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import net.dv8tion.jda.api.entities.Guild;
+import control.Server;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,50 +22,37 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     private final static Logger log = LoggerFactory.getLogger(ServerPlayer.class);
 
     private PlayerState state = PlayerState.DISCONNECTED;
-    private Guild linkedGuild;
-    private AudioPlayer player;
+    
+    private final Server linkedServer;
+    private final AudioPlayer player;
 
-    private List<String> playlist;
+    private List<TrackInfo> playlist;
 
-    private ServerPlayer() {
-
-    }
-
-    public static ServerPlayer createServerPlayer(Guild guild) {
-        ServerPlayer player = new ServerPlayer();
-
-        player.linkedGuild = guild;
-
-        player.player = pManager.createPlayer();
-        guild.getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player.player));
-
-        return player;
+    public ServerPlayer(Server server) {
+        player = pManager.createPlayer();
+        linkedServer = server;
+        
+        linkedServer.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
     }
 
     public void connect(VoiceChannel channel) {
         if (state == PlayerState.DISCONNECTED) {
-            linkedGuild.getAudioManager().openAudioConnection(channel);
+            linkedServer.getGuild().getAudioManager().openAudioConnection(channel);
             state = PlayerState.STOPPED;
         }
     }
 
     public void disconnect() {
         if (state != PlayerState.DISCONNECTED) {
-            linkedGuild.getAudioManager().closeAudioConnection();
+            linkedServer.getGuild().getAudioManager().closeAudioConnection();
             state = PlayerState.DISCONNECTED;
         }
     }
 
-    public void play(List<String> playlist) {
+    public void play() {
         if (state != PlayerState.DISCONNECTED) {
-            this.playlist = playlist;
-
-            if (playlist.size() == 0) {
-                this.playlist = null;
-                return;
-            }
-
-            pManager.loadItem(playlist.remove(0), this);
+            this.playlist = linkedServer.getPlaylist();
+            loadNext();
         }
     }
 
@@ -97,7 +84,7 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
             playlist = null;
             state = PlayerState.STOPPED;
         } else {
-            pManager.loadItem(playlist.remove(0), this);
+            pManager.loadItem(playlist.remove(0).trackId, this);
         }
     }
 
@@ -121,14 +108,13 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
         if (endReason.mayStartNext) {
             loadNext();
         } else if (endReason == AudioTrackEndReason.CLEANUP) {
-            state = PlayerState.STOPPED;
-            playlist = null;
+            disconnect();
         }
     }
 
     @Override
     public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
-        log.error("Exception occurred while playing track in guild #" + linkedGuild.getIdLong(), exception);
+        log.error("Exception occurred while playing track in guild #" + linkedServer.getGuild().getIdLong(), exception);
     }
 
     @Override
