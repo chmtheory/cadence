@@ -19,11 +19,11 @@ import util.YoutubeUtil;
 import java.util.List;
 
 public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHandler {
+    // TODO: Save currently playing track information to retrieve later.
 
     static {
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(playerManager);
-
         pManager = playerManager;
     }
 
@@ -40,6 +40,7 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     public ServerPlayer(Server server) {
         player = pManager.createPlayer();
         player.addListener(this);
+
         linkedServer = server;
         linkedServer.getGuild().getAudioManager().setSendingHandler(new AudioPlayerSendHandler(player));
     }
@@ -52,6 +53,7 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     }
 
     public void disconnect() {
+        // TODO: Disconnect automatically after a certain period of inactivity.
         if (state != PlayerState.DISCONNECTED) {
             linkedServer.getGuild().getAudioManager().closeAudioConnection();
             state = PlayerState.DISCONNECTED;
@@ -93,6 +95,8 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     }
 
     private void loadNext() {
+        player.stopTrack();
+
         if (playlist.size() == 0) {
             playlist = null;
             state = PlayerState.STOPPED;
@@ -120,8 +124,6 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
             loadNext();
-        } else if (endReason == AudioTrackEndReason.CLEANUP) {
-            disconnect();
         }
     }
 
