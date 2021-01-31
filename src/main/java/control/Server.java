@@ -33,6 +33,10 @@ public class Server {
         tracks.remove(id);
     }
 
+    public boolean hasTrack(String id) {
+        return tracks.containsKey(id);
+    }
+
     public Guild getGuild() {
         return guild;
     }
