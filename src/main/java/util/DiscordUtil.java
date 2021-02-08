@@ -18,6 +18,10 @@ public final class DiscordUtil {
         event.getChannel().sendMessage(message).queue();
     }
 
+    public static void sendMessageToDefaultTextChannel(Server server, String message) {
+        sendMessage(getDefaultTextChannel(server), message);
+    }
+
     public static void sendMessage(TextChannel channel, String message) {
         channel.sendMessage(message).queue();
     }
