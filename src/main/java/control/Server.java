@@ -5,6 +5,7 @@ import music.TrackInfo;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,8 +21,8 @@ public class Server {
     }
 
     public List<TrackInfo> getPlaylist() {
-        ArrayList<TrackInfo> playlist = new ArrayList<>();
-        playlist.addAll(tracks.values());
+        ArrayList<TrackInfo> playlist = new ArrayList<>(tracks.values());
+        Collections.shuffle(playlist);
         return playlist;
     }
 
@@ -29,8 +30,8 @@ public class Server {
         tracks.put(id, new TrackInfo(id, name));
     }
 
-    public void removeTrack(String id) {
-        tracks.remove(id);
+    public TrackInfo removeTrack(String id) {
+        return tracks.remove(id);
     }
 
     public boolean hasTrack(String id) {
