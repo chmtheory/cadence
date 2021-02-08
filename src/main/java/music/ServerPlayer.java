@@ -14,12 +14,15 @@ import control.Server;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.DiscordUtil;
 import util.YoutubeUtil;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHandler {
-    // TODO: Save currently playing track information to retrieve later.
+    // TODO: Detect if nobody is in the same voice channel for an extended period of time.
 
     static {
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
@@ -36,6 +39,9 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     private final AudioPlayer player;
 
     private List<TrackInfo> playlist;
+    private int position;
+
+    private Timer afkTimer;
 
     public ServerPlayer(Server server) {
         player = pManager.createPlayer();
@@ -48,7 +54,7 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     public void connect(VoiceChannel channel) {
         if (state == PlayerState.DISCONNECTED) {
             linkedServer.getGuild().getAudioManager().openAudioConnection(channel);
-            state = PlayerState.STOPPED;
+            setState(PlayerState.STOPPED);
         }
     }
 
@@ -56,13 +62,14 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
         // TODO: Disconnect automatically after a certain period of inactivity.
         if (state != PlayerState.DISCONNECTED) {
             linkedServer.getGuild().getAudioManager().closeAudioConnection();
-            state = PlayerState.DISCONNECTED;
+            setState(PlayerState.DISCONNECTED);
         }
     }
 
     public void notifyDisconnected() {
         this.playlist = null;
-        state = PlayerState.DISCONNECTED;
+        this.position = 0;
+        setState(PlayerState.DISCONNECTED);
     }
 
     public void play() {
@@ -91,7 +98,7 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
     public void stop() {
         if (state == PlayerState.PAUSED || state == PlayerState.PLAYING) {
             player.stopTrack();
-            state = PlayerState.STOPPED;
+            setState(PlayerState.STOPPED);
         }
     }
 
@@ -99,30 +106,57 @@ public class ServerPlayer extends AudioEventAdapter implements AudioLoadResultHa
         return state;
     }
 
+    private void setState(PlayerState state) {
+        this.state = state;
+        if (state == PlayerState.STOPPED) {
+            afkTimer = new Timer();
+            afkTimer.schedule(new TimerTask() {
+                public void run() {
+                    disconnect();
+                    afkTimer = null;
+                }
+            }, 30000);
+        } else {
+            afkTimer.cancel();
+            afkTimer = null;
+        }
+    }
+
     private void loadNext() {
         player.stopTrack();
 
-        if (playlist.size() == 0) {
-            playlist = null;
-            state = PlayerState.STOPPED;
-        } else {
-            pManager.loadItem(YoutubeUtil.createYoutubeLinkFromId(playlist.remove(0).trackId), this);
+        if (state != PlayerState.STOPPED) {
+            position++;
+
         }
+
+        if (position >= playlist.size()) {
+            playlist = null;
+            position = 0;
+            setState(PlayerState.STOPPED);
+        } else {
+            pManager.loadItem(YoutubeUtil.createYoutubeLinkFromId(playlist.get(position).trackId), this);
+        }
+
     }
 
     @Override
     public void onPlayerPause(AudioPlayer player) {
-        state = PlayerState.PAUSED;
+        setState(PlayerState.PAUSED);
     }
 
     @Override
     public void onPlayerResume(AudioPlayer player) {
-        state = PlayerState.PLAYING;
+        setState(PlayerState.PLAYING);
     }
 
     @Override
     public void onTrackStart(AudioPlayer player, AudioTrack track) {
         state = PlayerState.PLAYING;
+
+        System.out.println("test");
+
+        DiscordUtil.sendMessageToDefaultTextChannel(linkedServer, "Now playing " + playlist.get(position).getName() + "!");
     }
 
     @Override
