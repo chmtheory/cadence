@@ -11,18 +11,13 @@ public class PlayCommand implements Command {
     public void execute(GuildMessageReceivedEvent event, Server server) {
         ServerPlayer player = server.getPlayer();
 
-        if (player.getState() == PlayerState.PLAYING) {
-            DiscordUtil.sendMessage(event, "Already playing!");
-        } else if (player.getState() == PlayerState.DISCONNECTED) {
+        if (player.getState() == PlayerState.DISCONNECTED) {
             player.connect(DiscordUtil.getDefaultVoiceChannel(server));
             player.play();
-            DiscordUtil.sendMessage(event, "Now playing!");
         } else if (player.getState() == PlayerState.PAUSED) {
             player.resume();
-            DiscordUtil.sendMessage(event, "Resuming playback!");
         } else if (player.getState() == PlayerState.STOPPED) {
             player.play();
-            DiscordUtil.sendMessage(event, "Now playing!");
         }
     }
 

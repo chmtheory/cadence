@@ -13,14 +13,8 @@ public class StopCommand implements Command {
 
         if (player.getState() == PlayerState.PLAYING) {
             player.stop();
-            DiscordUtil.sendMessage(event, "Player stopped!");
-        } else if (player.getState() == PlayerState.DISCONNECTED) {
-            DiscordUtil.sendMessage(event, "Player is not connected!");
         } else if (player.getState() == PlayerState.PAUSED) {
             player.stop();
-            DiscordUtil.sendMessage(event, "Player stopped!");
-        } else if (player.getState() == PlayerState.STOPPED) {
-            DiscordUtil.sendMessage(event, "Player is already stopped!!");
         }
     }
 

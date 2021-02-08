@@ -11,11 +11,8 @@ public class SkipCommand implements Command {
     public void execute(GuildMessageReceivedEvent event, Server server) {
         ServerPlayer player = server.getPlayer();
 
-        if (player.getState() != PlayerState.PLAYING) {
-            DiscordUtil.sendMessage(event, "Can't skip track when paused or stopped!");
-        } else {
+        if (player.getState() == PlayerState.PLAYING) {
             player.skip();
-            DiscordUtil.sendMessage(event, "Skipping current track!");
         }
     }
 
